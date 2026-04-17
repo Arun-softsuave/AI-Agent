@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+streamlit
+requests
+pandas
+pydantic>=2
+langgraph
+langchain-openai
+python-dotenv

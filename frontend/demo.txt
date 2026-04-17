@@ -1,0 +1,10 @@
+1. What is total revenue?
+2. Which country has highest profit?
+3. Show total revenue by region
+4. Total profit in Asia
+5. Top 5 countries by sales
+6. Which item type gives max profit?
+7. Compare Asia and Europe revenue
+8. What about second highest?
+9. Who is PM of India?
+10. Tell me joke

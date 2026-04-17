@@ -1,0 +1,105 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+*.pyd
+*.dll
+
+# Distribution / packaging
+.Python
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache/
+pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Type checker caches
+.mypy_cache/
+.pyre/
+.pytype/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+*.iml
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Environment variables
+.env
+.env.*
+.venv
+
+# Logs
+*.log
+logs/
+
+# SQLite / local DB
+*.sqlite3
+*.db
+
+# MLflow
+mlruns/
+mlartifacts/
+mlflow.db
+
+# FastAPI / Uvicorn temp
+*.pid
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# User uploaded/generated files
+uploads/
+tmp/
+temp/
+
+# Data files (optional - uncomment if needed)
+# *.csv
+# *.xlsx
+
+# Python packaging lockfiles (optional)
+# poetry.lock
+# Pipfile.lock
