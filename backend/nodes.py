@@ -6,12 +6,29 @@ llm = get_llm()
 CSV_PATH = "backend/data/sales.csv"
 
 
+def get_recent_history(state, turns=2):
+    messages = state.get("messages", [])
+
+    limit = turns * 2
+    recent = messages[-limit:]
+
+    history = ""
+
+    for msg in recent:
+        role = msg["role"].upper()
+        content = msg["content"]
+        history += f"{role}: {content}\n"
+
+    return history.strip()
+
+
 # -----------------------------------
 # 1. Understand Query
 # -----------------------------------
 
 def understand_query(state):
     schema = build_rich_schema(CSV_PATH)
+    history = get_recent_history(state)
 
     prompt = f"""
 You are an intelligent classifier.
@@ -19,15 +36,20 @@ You are an intelligent classifier.
 Dataset:
 {schema}
 
-User Question:
+Previous Conversation:
+{history}
+
+Current User Question:
 {state["user_query"]}
+
+Use previous conversation if current question is short or incomplete.
 
 Return ONLY YES if question can be answered from dataset.
 Return ONLY NO if unrelated.
 
 Examples:
 Top profit country = YES
-Total revenue by region = YES
+loss = YES (if previous was top profit country)
 Who is Elon Musk = NO
 How are you = NO
 """
@@ -38,7 +60,7 @@ How are you = NO
     state["retry_count"] = 0
     state["max_retry"] = 3
 
-    state["messages"] = [
+    state["messages"] = state.get("messages", []) + [
         {
             "role": "user",
             "content": state["user_query"]
@@ -57,7 +79,7 @@ def out_of_context(state):
 
     state["final_answer"] = answer
 
-    state["messages"] = [
+    state["messages"] = state.get("messages", []) + [
         {
             "role": "assistant",
             "content": answer
@@ -72,10 +94,16 @@ def out_of_context(state):
 # -----------------------------------
 
 def query_planner(state):
+    history = get_recent_history(state)
 
     prompt = f"""
-User Question:
+Previous Conversation:
+{history}
+
+Current User Question:
 {state["user_query"]}
+
+Use previous context if needed.
 
 Identify query type.
 
@@ -102,6 +130,7 @@ count
 
 def generate_query(state):
     schema = build_rich_schema(CSV_PATH)
+    history = get_recent_history(state)
 
     prompt = f"""
 You are expert pandas analyst.
@@ -109,8 +138,13 @@ You are expert pandas analyst.
 Dataset:
 {schema}
 
-User Question:
+Previous Conversation:
+{history}
+
+Current User Question:
 {state["user_query"]}
+
+Use previous context if question is incomplete.
 
 Query Type:
 {state["plan"]}
@@ -123,9 +157,9 @@ Rules:
 
 Examples:
 
-df.groupby("Country")["Total Profit"].sum().sort_values(ascending=False).head(1)
+df.groupby("Country")["Total Profit"].sum().sort_values(ascending=False).head(5)
 
-df.groupby("Region")["Total Revenue"].sum().reset_index()
+df.groupby("Country")["Total Profit"].sum().sort_values().head(5)
 """
 
     query = llm.invoke(prompt).content.strip()
@@ -142,8 +176,8 @@ df.groupby("Region")["Total Revenue"].sum().reset_index()
 # -----------------------------------
 
 def execute_query(state):
-
     import numpy as np
+
     df = pd.read_csv(CSV_PATH)
 
     try:
@@ -189,10 +223,10 @@ def execute_query(state):
 # -----------------------------------
 
 def retry_agent(state):
-
     state["retry_count"] += 1
 
     schema = build_rich_schema(CSV_PATH)
+    history = get_recent_history(state)
 
     prompt = f"""
 You are pandas repair expert.
@@ -200,17 +234,26 @@ You are pandas repair expert.
 Dataset:
 {schema}
 
-User Question:
+Previous Conversation:
+{history}
+
+Current User Question:
 {state["user_query"]}
 
-Previous Query:
+Previous Failed Query:
 {state["query"]}
 
-Error:
+Execution Error:
 {state["error"]}
 
+Use previous conversation if user query is incomplete.
+
 Fix and return ONLY corrected pandas query.
-Use dataframe name df.
+
+Rules:
+1. dataframe name is df
+2. no explanation
+3. exact columns only
 """
 
     fixed_query = llm.invoke(prompt).content.strip()
@@ -227,24 +270,29 @@ Use dataframe name df.
 # -----------------------------------
 
 def generate_final_answer(state):
+    history = get_recent_history(state)
 
     prompt = f"""
 You are business analyst.
 
-User Question:
+Previous Conversation:
+{history}
+
+Current User Question:
 {state["user_query"]}
 
 Retrieved Data:
 {state["retrieved_data"]}
 
 Give clear human answer.
+Use previous context if needed.
 """
 
     answer = llm.invoke(prompt).content.strip()
 
     state["final_answer"] = answer
 
-    state["messages"] = [
+    state["messages"] = state.get("messages", []) + [
         {
             "role": "assistant",
             "content": answer

@@ -1,16 +1,13 @@
-
-from typing import TypedDict, Annotated, List, Dict, Any
-import operator
+from typing import TypedDict, List, Dict, Any
 
 
 class AgentState(TypedDict, total=False):
     thread_id: str
     user_query: str
 
-    messages: Annotated[List[Dict[str, str]], operator.concat]
+    messages: List[Dict[str, str]]
 
     csv_relevant: bool
-    intent: str
     plan: str
 
     query: str
