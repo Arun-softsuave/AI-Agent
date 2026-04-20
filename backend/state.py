@@ -7,7 +7,7 @@ class AgentState(TypedDict, total=False):
     thread_id: str
     user_query: str
 
-    messages: Annotated[List[Dict[str, str]], operator.add]
+    messages: Annotated[List[Dict[str, str]], operator.concat]
 
     csv_relevant: bool
     intent: str

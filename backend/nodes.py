@@ -1,9 +1,6 @@
-
 import pandas as pd
 from backend.llm import get_llm
 from backend.schema_builder import build_rich_schema
-
-
 
 llm = get_llm()
 CSV_PATH = "backend/data/sales.csv"
@@ -40,14 +37,13 @@ How are you = NO
     state["csv_relevant"] = response.startswith("YES")
     state["retry_count"] = 0
     state["max_retry"] = 3
-    state["messages"] = state.get("messages", [])
 
-    state["messages"].append(
+    state["messages"] = [
         {
             "role": "user",
             "content": state["user_query"]
         }
-    )
+    ]
 
     return state
 
@@ -61,12 +57,12 @@ def out_of_context(state):
 
     state["final_answer"] = answer
 
-    state["messages"].append(
+    state["messages"] = [
         {
             "role": "assistant",
             "content": answer
         }
-    )
+    ]
 
     return state
 
@@ -144,7 +140,6 @@ df.groupby("Region")["Total Revenue"].sum().reset_index()
 # -----------------------------------
 # 5. Execute Query
 # -----------------------------------
-
 
 def execute_query(state):
 
@@ -249,11 +244,11 @@ Give clear human answer.
 
     state["final_answer"] = answer
 
-    state["messages"].append(
+    state["messages"] = [
         {
             "role": "assistant",
             "content": answer
         }
-    )
+    ]
 
     return state
